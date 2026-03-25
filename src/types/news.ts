@@ -1,10 +1,18 @@
 export type CEFRLevel = "A1" | "B1" | "B2" | "C1";
 
+export interface SpeakingLine {
+  text: string;
+  highlight: {
+    phrase: string;
+    meaning: string;
+  } | null;
+}
+
 export interface SayItContent {
-  A1: string[];
-  B1: string[];
-  B2: string[];
-  C1: string[];
+  A1: SpeakingLine[];
+  B1: SpeakingLine[];
+  B2: SpeakingLine[];
+  C1: SpeakingLine[];
 }
 
 export interface NewsItem {

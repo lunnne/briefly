@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { CEFRLevel, SayItContent } from "@/types/news";
+import { CEFRLevel, SayItContent, SpeakingLine } from "@/types/news";
 
 const LEVELS: CEFRLevel[] = ["A1", "B1", "B2", "C1"];
 
@@ -9,17 +9,43 @@ interface Props {
   sayIt: SayItContent;
 }
 
+// 문장 안에서 highlight.phrase를 찾아 강조 span으로 감싸서 반환
+function renderText(line: SpeakingLine, isFocused: boolean) {
+  if (!isFocused || !line.highlight) {
+    return <span>{line.text}</span>;
+  }
+
+  const { phrase } = line.highlight;
+  const idx = line.text.indexOf(phrase);
+
+  // phrase가 text 안에 없으면 그냥 표시
+  if (idx === -1) return <span>{line.text}</span>;
+
+  const before = line.text.slice(0, idx);
+  const after = line.text.slice(idx + phrase.length);
+
+  return (
+    <span>
+      {before}
+      <mark className="bg-stone-100 text-gray-800 rounded px-0.5 not-italic font-normal">
+        {phrase}
+      </mark>
+      {after}
+    </span>
+  );
+}
+
 export default function SayItSection({ sayIt }: Props) {
   const [active, setActive] = useState<CEFRLevel>("B1");
-  const [focusedSentence, setFocusedSentence] = useState<number | null>(null);
+  const [focusedIndex, setFocusedIndex] = useState<number | null>(null);
 
   function handleLevelChange(level: CEFRLevel) {
     setActive(level);
-    setFocusedSentence(null);
+    setFocusedIndex(null);
   }
 
   function handleSentenceClick(i: number) {
-    setFocusedSentence((prev) => (prev === i ? null : i));
+    setFocusedIndex((prev) => (prev === i ? null : i));
   }
 
   return (
@@ -28,7 +54,7 @@ export default function SayItSection({ sayIt }: Props) {
       <div className="flex items-end justify-between mb-4">
         <p className="text-[13px] text-gray-400 italic">Say it in your own words</p>
 
-        {/* Level tabs — pill style */}
+        {/* Level tabs */}
         <div className="flex gap-1">
           {LEVELS.map((level) => (
             <button
@@ -51,9 +77,9 @@ export default function SayItSection({ sayIt }: Props) {
 
       {/* Sentences */}
       <ol className="space-y-1">
-        {sayIt[active].map((sentence, i) => {
-          const isFocused = focusedSentence === i;
-          const isDimmed = focusedSentence !== null && !isFocused;
+        {sayIt[active].map((line, i) => {
+          const isFocused = focusedIndex === i;
+          const isDimmed = focusedIndex !== null && !isFocused;
           return (
             <li
               key={i}
@@ -73,9 +99,22 @@ export default function SayItSection({ sayIt }: Props) {
               >
                 {i + 1}
               </span>
-              <p className="text-[14px] text-gray-600 leading-[1.7]">
-                {sentence}
-              </p>
+
+              <div className="flex flex-col gap-1.5">
+                <p className="text-[14px] text-gray-600 leading-[1.7]">
+                  {renderText(line, isFocused)}
+                </p>
+
+                {/* Phrase hint — only when focused and highlight exists */}
+                {isFocused && line.highlight && (
+                  <p className="text-[11px] text-gray-400 leading-relaxed">
+                    <span className="text-gray-300 mr-1.5">↳</span>
+                    {line.highlight.phrase}
+                    <span className="text-gray-300 mx-1.5">·</span>
+                    {line.highlight.meaning}
+                  </p>
+                )}
+              </div>
             </li>
           );
         })}

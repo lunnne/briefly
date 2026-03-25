@@ -1,7 +1,9 @@
 import NewsCard from "@/components/NewsCard";
-import { newsItems } from "@/data/news";
+import { getTodayCards } from "@/lib/getTodayCards";
 
-export default function Home() {
+export default async function Home() {
+  const cards = await getTodayCards();
+
   return (
     <main className="min-h-screen max-w-lg mx-auto px-5 py-12">
       {/* Header */}
@@ -15,15 +17,22 @@ export default function Home() {
       </header>
 
       {/* News feed */}
-      <div className="space-y-6">
-        {newsItems.map((item, index) => (
-          <NewsCard key={item.id} item={item} index={index} />
-        ))}
-      </div>
+      {cards.length > 0 ? (
+        <div className="space-y-6">
+          {cards.map((item, index) => (
+            <NewsCard key={item.id} item={item} index={index} />
+          ))}
+        </div>
+      ) : (
+        <div className="text-center py-24">
+          <p className="text-gray-400 text-sm">No cards for today yet.</p>
+          <p className="mt-1 text-gray-300 text-xs">Check back later.</p>
+        </div>
+      )}
 
       {/* Footer */}
       <footer className="mt-16 text-center text-xs text-gray-200 tracking-wider">
-        Mock data · No backend
+        Briefly
       </footer>
     </main>
   );
