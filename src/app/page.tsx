@@ -1,6 +1,9 @@
 import NewsCard from "@/components/NewsCard";
 import { getTodayCards } from "@/lib/getTodayCards";
 
+// 항상 최신 데이터를 가져오도록 — 페이지를 정적 캐시하지 않음
+export const dynamic = "force-dynamic";
+
 export default async function Home() {
   const cards = await getTodayCards();
 
